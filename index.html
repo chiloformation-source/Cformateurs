@@ -1,0 +1,2847 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Formateurs & Recrutement</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --accent-primary: #0ea5e9;
+            --accent-secondary: #8b5cf6;
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #faf5ff 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(14, 165, 233, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 2rem;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+            animation: fadeIn 0.6s ease 0.2s both;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--accent-primary);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            animation: slideIn 0.3s ease;
+        }
+
+        /* Tab content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .kpi-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .kpi-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-primary);
+        }
+
+        .kpi-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .kpi-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, var(--accent-primary), var(--text-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .kpi-subtext {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Filters & Controls */
+        .controls {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        select, .btn {
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:hover, .btn:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-primary);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 217, 255, 0.3);
+        }
+
+        /* Table */
+        .table-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-tertiary);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: color 0.3s ease;
+            white-space: nowrap;
+        }
+
+        th:hover {
+            color: var(--accent-primary);
+        }
+
+        th.sortable::after {
+            content: ' ↕';
+            opacity: 0.3;
+        }
+
+        th.sorted-asc::after {
+            content: ' ↑';
+            opacity: 1;
+            color: var(--accent-primary);
+        }
+
+        th.sorted-desc::after {
+            content: ' ↓';
+            opacity: 1;
+            color: var(--accent-primary);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(0, 217, 255, 0.05);
+        }
+
+        tbody tr.new-row {
+            background: rgba(14, 165, 233, 0.15);
+            animation: highlightNew 2s ease;
+        }
+
+        @keyframes highlightNew {
+            0% { background: rgba(14, 165, 233, 0.3); }
+            100% { background: rgba(14, 165, 233, 0.05); }
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success { background: rgba(16, 185, 129, 0.2); color: var(--accent-success); }
+        .badge-warning { background: rgba(245, 158, 11, 0.2); color: var(--accent-warning); }
+        .badge-danger { background: rgba(239, 68, 68, 0.2); color: var(--accent-danger); }
+        .badge-info { background: rgba(0, 217, 255, 0.2); color: var(--accent-primary); }
+        .badge-secondary { background: rgba(124, 58, 237, 0.2); color: var(--accent-secondary); }
+
+        /* Tags */
+        .tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 0.25rem 0.5rem;
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--accent-primary);
+        }
+
+        /* Rating stars */
+        .rating {
+            color: var(--accent-warning);
+            font-size: 1rem;
+        }
+
+        /* Icon button */
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            background: rgba(0, 217, 255, 0.1);
+            transform: scale(1.1);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--accent-danger);
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .info-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+        }
+
+        /* Section */
+        .section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Priority badge */
+        .priority-high { background: rgba(239, 68, 68, 0.2); color: var(--accent-danger); }
+        .priority-medium { background: rgba(245, 158, 11, 0.2); color: var(--accent-warning); }
+        .priority-low { background: rgba(16, 185, 129, 0.2); color: var(--accent-success); }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+
+        /* File upload */
+        .file-upload {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .file-upload:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-primary);
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        /* Link */
+        .link {
+            color: var(--accent-primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .link:hover {
+            color: var(--accent-secondary);
+            text-decoration: underline;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Editable cells */
+        .editable {
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .editable:hover {
+            background: rgba(14, 165, 233, 0.1);
+            outline: 1px solid var(--accent-primary);
+        }
+
+        .editable:hover::after {
+            content: '✏️';
+            position: absolute;
+            right: 0.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            opacity: 0.5;
+        }
+
+        .editing {
+            padding: 0 !important;
+        }
+
+        .edit-input, .edit-select, .edit-textarea {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--accent-primary);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .edit-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .edit-input:focus, .edit-select:focus, .edit-textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls-row {
+                flex-direction: column;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+
+        /* Messages de recrutement */
+        .message-template {
+            margin-bottom: 1.5rem;
+        }
+
+        .message-template h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .message-template .btn {
+            margin-left: auto;
+            font-size: 0.9rem;
+            padding: 0.4rem 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 🎯 BANDEAU MODE DEMO -->
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: white; padding: 1rem 2rem; text-align: center; font-weight: 600; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <span style="font-size: 1.1rem;">🎯 MODE DÉMONSTRATION</span>
+        <span style="opacity: 0.95; margin-left: 1rem; font-size: 0.95rem;">
+            | Données exemples préchargées | Testez toutes les fonctionnalités | Édition inline, filtres, KPI en temps réel
+        </span>
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Dashboard Formateurs & Recrutement</h1>
+            <p>Pilotage des formateurs, gestion des candidats et besoins en recrutement</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="formateurs">👥 Nos Formateurs</button>
+            <button class="tab" data-tab="recrutement">🎯 Recrutement</button>
+        </div>
+
+        <!-- Onglet 1: Nos Formateurs -->
+        <div class="tab-content active" id="formateurs">
+            <!-- KPI -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Formateurs</div>
+                    <div class="kpi-value" id="kpi-total-formateurs">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Dossiers</div>
+                    <div class="kpi-value" id="kpi-total-dossiers">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Moy. Dossiers</div>
+                    <div class="kpi-value" id="kpi-moy-dossiers">0</div>
+                    <div class="kpi-subtext">par formateur</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Note Moyenne</div>
+                    <div class="kpi-value" id="kpi-moy-note">0</div>
+                    <div class="kpi-subtext">/ 5</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Coût Moyen</div>
+                    <div class="kpi-value" id="kpi-cout-moyen">0€</div>
+                    <div class="kpi-subtext">par formateur</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Top Formateur</div>
+                    <div class="kpi-value" style="font-size: 0.95rem;" id="kpi-top-formateur">-</div>
+                    <div class="kpi-subtext" id="kpi-top-formateur-note">-</div>
+                </div>
+            </div>
+
+            <!-- Contrôles -->
+            <div class="controls">
+                <div class="controls-row">
+                    <div class="search-box">
+                        <input type="text" id="search-formateurs" placeholder="Rechercher un formateur...">
+                    </div>
+                    <select id="filter-formation">
+                        <option value="">Toutes les formations</option>
+                    </select>
+                    <select id="filter-type-formation">
+                        <option value="">Tous les types</option>
+                        <option value="bureautique">Bureautique</option>
+                        <option value="langues">Langues</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                    <select id="filter-contrat">
+                        <option value="">Tous les contrats</option>
+                        <option value="sous-traitant">Sous-traitant</option>
+                        <option value="cdi">CDI</option>
+                        <option value="cdd">CDD d'usage</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="addQuickRow('formateur')">➕ Ajouter ligne rapide</button>
+                    <button class="btn" onclick="addFormateur()">✏️ Formulaire complet</button>
+                    <button class="btn" onclick="document.getElementById('import-file').click()" title="Importer des formateurs">📥 Importer</button>
+                    <button class="btn" onclick="exportFormateurs()" title="Exporter les formateurs">📤 Exporter</button>
+                    <button class="icon-btn" onclick="openModal('modal-import-info')" title="Aide import/export" style="font-size: 1.25rem;">❓</button>
+                    <input type="file" id="import-file" accept=".csv,.json" style="display: none;" onchange="importFormateurs(event)">
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="formateur">Formateur</th>
+                            <th>Formation(s)</th>
+                            <th>Type</th>
+                            <th>Tags</th>
+                            <th class="sortable" data-sort="tarif">Tarif</th>
+                            <th class="sortable" data-sort="dossiers">Dossiers</th>
+                            <th class="sortable" data-sort="note">Note</th>
+                            <th>Contrat</th>
+                            <th>Calendly</th>
+                            <th>Meet</th>
+                            <th>Observations</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-formateurs">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Section Statistiques (en bas, compacts) -->
+            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border-color);">
+                <h2 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1.25rem;">
+                    📊 Statistiques Détaillées
+                </h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; box-shadow: var(--shadow-sm);">
+                        <h3 style="margin-bottom: 0.75rem; color: var(--text-primary); font-size: 0.95rem; font-weight: 600;">📊 Répartition par Type</h3>
+                        <div id="chart-repartition-type"></div>
+                    </div>
+                    <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; box-shadow: var(--shadow-sm);">
+                        <h3 style="margin-bottom: 0.75rem; color: var(--text-primary); font-size: 0.95rem; font-weight: 600;">💰 Coût Moyen par Type</h3>
+                        <div id="chart-cout-type"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet 2: Recrutement -->
+        <div class="tab-content" id="recrutement">
+            <!-- Bouton Messages de Recrutement -->
+            <div style="margin-bottom: 2rem;">
+                <button class="btn btn-primary" onclick="openMessagesRecrutement()" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                    💬 Messages de Recrutement
+                </button>
+            </div>
+
+            <!-- Section À recruter (EN PREMIER) -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">✅ À Recruter</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-primary" onclick="addQuickRow('besoin')">➕ Ajouter ligne rapide</button>
+                        <button class="btn" onclick="addBesoinRecrutement()">✏️ Formulaire complet</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Thématique</th>
+                                <th>Type</th>
+                                <th>Priorité</th>
+                                <th>Observations</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-besoins">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Section Candidats (EN SECOND) -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📋 Candidats</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-primary" onclick="addQuickRow('candidat')">➕ Ajouter ligne rapide</button>
+                        <button class="btn" onclick="addCandidat()">✏️ Formulaire complet</button>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <div class="controls-row">
+                        <div class="search-box">
+                            <input type="text" id="search-candidats" placeholder="Rechercher un candidat...">
+                        </div>
+                        <select id="filter-candidat-formation">
+                            <option value="">Toutes les formations</option>
+                        </select>
+                        <select id="filter-candidat-type">
+                            <option value="">Tous les types</option>
+                            <option value="bureautique">Bureautique</option>
+                            <option value="langues">Langues</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                        <select id="filter-statut">
+                            <option value="">Tous les statuts</option>
+                            <option value="contacté">Contacté</option>
+                            <option value="en échange">En échange</option>
+                            <option value="rdv prévu">RDV prévu</option>
+                        </select>
+                        <select id="filter-nda">
+                            <option value="">NDA - Tous</option>
+                            <option value="oui">Oui</option>
+                            <option value="non">Non</option>
+                            <option value="en cours">En cours</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Candidat</th>
+                                <th>Téléphone</th>
+                                <th>Formation</th>
+                                <th>Type</th>
+                                <th>Source</th>
+                                <th>Statut</th>
+                                <th>Tarif proposé</th>
+                                <th>NDA</th>
+                                <th>CV</th>
+                                <th>Observations</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-candidats">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Fiche Formateur -->
+    <div class="modal" id="modal-formateur">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📄 Fiche Formateur</h2>
+                <button class="close-btn" onclick="closeModal('modal-formateur')">✕</button>
+            </div>
+            <div class="modal-body" id="modal-formateur-body">
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Fiche Candidat -->
+    <div class="modal" id="modal-candidat">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📄 Fiche Candidat</h2>
+                <button class="close-btn" onclick="closeModal('modal-candidat')">✕</button>
+            </div>
+            <div class="modal-body" id="modal-candidat-body">
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajout/Édition Formateur -->
+    <div class="modal" id="modal-edit-formateur">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="edit-formateur-title">➕ Nouveau Formateur</h2>
+                <button class="close-btn" onclick="closeModal('modal-edit-formateur')">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-formateur" onsubmit="saveFormateur(event)">
+                    <input type="hidden" id="edit-formateur-id">
+                    
+                    <div class="info-group">
+                        <label class="info-label" for="edit-formateur-nom">Nom du formateur</label>
+                        <input type="text" id="edit-formateur-nom" style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-formateur-formations">Formations (séparées par des virgules)</label>
+                        <input type="text" id="edit-formateur-formations" placeholder="Excel, Word, PowerPoint" style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-formateur-type">Type de formation</label>
+                        <select id="edit-formateur-type" style="width: 100%;">
+                            <option value="">-- Sélectionner --</option>
+                            <option value="bureautique">Bureautique</option>
+                            <option value="langues">Langues</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-formateur-tarif">Tarif</label>
+                        <input type="text" id="edit-formateur-tarif" placeholder="450€/jour ou 60€/h" style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-formateur-dossiers">Nombre de dossiers</label>
+                        <input type="number" id="edit-formateur-dossiers" min="0" value="0" style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-formateur-note">Note qualité (sur 5)</label>
+                        <input type="number" id="edit-formateur-note" min="0" max="5" step="0.1" value="0" style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-formateur-contrat">Type de contrat</label>
+                        <select id="edit-formateur-contrat" style="width: 100%;">
+                            <option value="">-- Sélectionner --</option>
+                            <option value="sous-traitant">Sous-traitant</option>
+                            <option value="cdi">CDI</option>
+                            <option value="cdd">CDD d'usage</option>
+                        </select>
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-formateur-meet">Lien Google Meet</label>
+                        <input type="url" id="edit-formateur-meet" placeholder="https://meet.google.com/..." style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-formateur-linkedin">Lien LinkedIn</label>
+                        <input type="url" id="edit-formateur-linkedin" placeholder="https://linkedin.com/in/..." style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-formateur-observations">Observations</label>
+                        <textarea id="edit-formateur-observations" rows="4"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">💾 Enregistrer</button>
+                        <button type="button" class="btn" onclick="closeModal('modal-edit-formateur')" style="flex: 1;">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajout/Édition Candidat -->
+    <div class="modal" id="modal-edit-candidat">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="edit-candidat-title">➕ Nouveau Candidat</h2>
+                <button class="close-btn" onclick="closeModal('modal-edit-candidat')">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-candidat" onsubmit="saveCandidat(event)">
+                    <input type="hidden" id="edit-candidat-id">
+                    
+                    <div class="info-group">
+                        <label class="info-label" for="edit-candidat-nom">Nom du candidat</label>
+                        <input type="text" id="edit-candidat-nom" style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-candidat-telephone">Téléphone</label>
+                        <input type="tel" id="edit-candidat-telephone" placeholder="06 12 34 56 78" style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-candidat-formation">Formation proposée</label>
+                        <input type="text" id="edit-candidat-formation" style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-candidat-type">Type de formation</label>
+                        <select id="edit-candidat-type" style="width: 100%;">
+                            <option value="">-- Sélectionner --</option>
+                            <option value="bureautique">Bureautique</option>
+                            <option value="langues">Langues</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-candidat-source">Source</label>
+                        <input type="text" id="edit-candidat-source" placeholder="LinkedIn, Indeed, Recommandation..." style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-candidat-statut">Statut recrutement</label>
+                        <select id="edit-candidat-statut" style="width: 100%;">
+                            <option value="">-- Sélectionner --</option>
+                            <option value="contacté">Contacté</option>
+                            <option value="en échange">En échange</option>
+                            <option value="rdv prévu">RDV prévu</option>
+                        </select>
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-candidat-tarif">Tarif proposé</label>
+                        <input type="text" id="edit-candidat-tarif" style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-candidat-nda">NDA</label>
+                        <select id="edit-candidat-nda" style="width: 100%;">
+                            <option value="">-- Sélectionner --</option>
+                            <option value="oui">Oui</option>
+                            <option value="non">Non</option>
+                            <option value="en cours">En cours</option>
+                        </select>
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-candidat-linkedin">Lien LinkedIn</label>
+                        <input type="url" id="edit-candidat-linkedin" placeholder="https://linkedin.com/in/..." style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label">CV (PDF, DOC, DOCX)</label>
+                        <label class="file-upload" style="display: inline-block; padding: 0.75rem 1.5rem; background: var(--accent-primary); color: white; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;">
+                            <input type="file" id="edit-candidat-cv" accept=".pdf,.doc,.docx" style="display: none;">
+                            📎 Choisir un fichier
+                        </label>
+                        <div id="cv-filename" style="margin-top: 0.5rem; padding: 0.5rem; background: var(--bg-tertiary); border-radius: 6px; color: var(--text-secondary); font-size: 0.875rem; display: none;">
+                            <span id="cv-filename-text"></span>
+                            <button type="button" onclick="clearCV()" style="float: right; background: none; border: none; color: var(--accent-danger); cursor: pointer; font-size: 1rem;">✕</button>
+                        </div>
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-candidat-observations">Observations</label>
+                        <textarea id="edit-candidat-observations" rows="4"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">💾 Enregistrer</button>
+                        <button type="button" class="btn" onclick="closeModal('modal-edit-candidat')" style="flex: 1;">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajout/Édition Besoin -->
+    <div class="modal" id="modal-edit-besoin">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="edit-besoin-title">➕ Nouveau Besoin</h2>
+                <button class="close-btn" onclick="closeModal('modal-edit-besoin')">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-besoin" onsubmit="saveBesoin(event)">
+                    <input type="hidden" id="edit-besoin-id">
+                    
+                    <div class="info-group">
+                        <label class="info-label" for="edit-besoin-thematique">Thématique</label>
+                        <input type="text" id="edit-besoin-thematique" placeholder="Ex: IA, Anglais, Excel avancé..." style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-besoin-type">Type de formation</label>
+                        <select id="edit-besoin-type" style="width: 100%;">
+                            <option value="">-- Sélectionner --</option>
+                            <option value="bureautique">Bureautique</option>
+                            <option value="langues">Langues</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-besoin-priorite">Priorité</label>
+                        <select id="edit-besoin-priorite" style="width: 100%;">
+                            <option value="moyenne">Moyenne</option>
+                            <option value="élevée">Élevée</option>
+                            <option value="faible">Faible</option>
+                        </select>
+                    </div>
+
+                    <div class="info-group">
+                        <label class="info-label" for="edit-besoin-observations">Observations</label>
+                        <textarea id="edit-besoin-observations" rows="4"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">💾 Enregistrer</button>
+                        <button type="button" class="btn" onclick="closeModal('modal-edit-besoin')" style="flex: 1;">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Import Info -->
+    <div class="modal" id="modal-import-info">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📥 Guide d'importation</h2>
+                <button class="close-btn" onclick="closeModal('modal-import-info')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-group">
+                    <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">Format JSON (recommandé)</h3>
+                    <p style="margin-bottom: 0.5rem;">Exportez d'abord vos données avec le bouton "📤 Exporter" pour voir le format exact.</p>
+                    <pre style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem;">
+[
+  {
+    "formateur": "Marie Dupont",
+    "formations": ["Excel", "Word"],
+    "type": "bureautique",
+    "tarif": "450€/jour",
+    "dossiers": 25,
+    "note": 4.8,
+    "contrat": "cdi",
+    "meet": "https://meet.google.com/...",
+    "linkedin": "https://linkedin.com/in/...",
+    "observations": "Excellente formatrice"
+  }
+]</pre>
+                </div>
+
+                <div class="info-group">
+                    <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">Format CSV</h3>
+                    <p style="margin-bottom: 0.5rem;">Utilisez un fichier CSV avec ces colonnes (séparateur: virgule, point-virgule ou tabulation) :</p>
+                    <pre style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem;">
+formateur,formations,type,tarif,dossiers,note,contrat,meet,linkedin,observations
+Marie Dupont,"Excel,Word",bureautique,450€/jour,25,4.8,cdi,https://meet.google.com/...,https://linkedin.com/in/...,Excellente formatrice
+Jean Martin,"Anglais,Espagnol",langues,60€/h,18,4.5,sous-traitant,,,Spécialisé anglais pro</pre>
+                    <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                        💡 <strong>Astuce :</strong> Les colonnes peuvent avoir des noms légèrement différents (nom, formateur, prix, tarif, etc.)
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Messages de Recrutement -->
+    <div class="modal" id="modal-messages-recrutement">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>💬 Messages de Recrutement</h2>
+                <button class="close-btn" onclick="closeModal('modal-messages-recrutement')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    Modèles de messages prêts à l'emploi pour votre processus de recrutement.
+                </p>
+
+                <!-- Template 1: Premier contact -->
+                <div class="message-template">
+                    <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                        📧 Premier Contact
+                        <button class="btn btn-sm" onclick="copyMessage('message-1')" style="margin-left: auto;">📋 Copier</button>
+                    </h3>
+                    <div id="message-1" style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent-primary); font-family: 'DM Sans', sans-serif; line-height: 1.6;">
+                        <p><strong>Objet :</strong> Opportunité de collaboration - Formateur [FORMATION]</p>
+                        <p style="margin-top: 0.75rem;">Bonjour [NOM],</p>
+                        <p>Nous avons découvert votre profil et sommes très intéressés par votre expertise en [FORMATION].</p>
+                        <p>Nous recherchons actuellement des formateurs qualifiés pour intervenir auprès de nos clients. Votre profil correspond parfaitement à nos besoins.</p>
+                        <p>Seriez-vous disponible pour échanger sur une potentielle collaboration ?</p>
+                        <p>Je reste à votre disposition pour en discuter.</p>
+                        <p style="margin-top: 0.75rem;">Cordialement,<br>[VOTRE NOM]</p>
+                    </div>
+                </div>
+
+                <!-- Template 2: Relance -->
+                <div class="message-template" style="margin-top: 1.5rem;">
+                    <h3 style="color: var(--accent-warning); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                        🔔 Relance
+                        <button class="btn btn-sm" onclick="copyMessage('message-2')" style="margin-left: auto;">📋 Copier</button>
+                    </h3>
+                    <div id="message-2" style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent-warning); font-family: 'DM Sans', sans-serif; line-height: 1.6;">
+                        <p><strong>Objet :</strong> Relance - Opportunité formateur</p>
+                        <p style="margin-top: 0.75rem;">Bonjour [NOM],</p>
+                        <p>Je me permets de revenir vers vous suite à mon message du [DATE].</p>
+                        <p>Nous sommes toujours à la recherche d'un formateur en [FORMATION] et votre profil nous intéresse particulièrement.</p>
+                        <p>Auriez-vous un moment cette semaine pour en discuter ?</p>
+                        <p style="margin-top: 0.75rem;">Bien cordialement,<br>[VOTRE NOM]</p>
+                    </div>
+                </div>
+
+                <!-- Template 3: Demande NDA -->
+                <div class="message-template" style="margin-top: 1.5rem;">
+                    <h3 style="color: var(--accent-secondary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                        📄 Demande de NDA
+                        <button class="btn btn-sm" onclick="copyMessage('message-3')" style="margin-left: auto;">📋 Copier</button>
+                    </h3>
+                    <div id="message-3" style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent-secondary); font-family: 'DM Sans', sans-serif; line-height: 1.6;">
+                        <p><strong>Objet :</strong> NDA - Prochaine étape de notre collaboration</p>
+                        <p style="margin-top: 0.75rem;">Bonjour [NOM],</p>
+                        <p>Suite à nos échanges, nous sommes ravis de poursuivre avec vous !</p>
+                        <p>Avant d'aller plus loin, pourriez-vous signer l'accord de confidentialité (NDA) ci-joint ?</p>
+                        <p>Vous pouvez le retourner signé par email ou via DocuSign : [LIEN]</p>
+                        <p>Une fois reçu, nous pourrons finaliser votre dossier et programmer votre première intervention.</p>
+                        <p style="margin-top: 0.75rem;">Merci et à très bientôt,<br>[VOTRE NOM]</p>
+                    </div>
+                </div>
+
+                <!-- Template 4: Convocation RDV -->
+                <div class="message-template" style="margin-top: 1.5rem;">
+                    <h3 style="color: var(--accent-success); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                        📅 Convocation RDV
+                        <button class="btn btn-sm" onclick="copyMessage('message-4')" style="margin-left: auto;">📋 Copier</button>
+                    </h3>
+                    <div id="message-4" style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent-success); font-family: 'DM Sans', sans-serif; line-height: 1.6;">
+                        <p><strong>Objet :</strong> RDV confirmé - [DATE] à [HEURE]</p>
+                        <p style="margin-top: 0.75rem;">Bonjour [NOM],</p>
+                        <p>Je confirme notre rendez-vous téléphonique/visio le <strong>[DATE]</strong> à <strong>[HEURE]</strong>.</p>
+                        <p><strong>Lien de connexion :</strong> [LIEN MEET/ZOOM/TEAMS]</p>
+                        <p><strong>Ordre du jour :</strong></p>
+                        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                            <li>Présentation de notre structure</li>
+                            <li>Vos compétences et expériences</li>
+                            <li>Modalités de collaboration</li>
+                            <li>Questions/réponses</li>
+                        </ul>
+                        <p style="margin-top: 0.75rem;">À très bientôt,<br>[VOTRE NOM]</p>
+                    </div>
+                </div>
+
+                <!-- Template 5: Refus poli -->
+                <div class="message-template" style="margin-top: 1.5rem;">
+                    <h3 style="color: var(--accent-danger); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                        ❌ Refus Poli
+                        <button class="btn btn-sm" onclick="copyMessage('message-5')" style="margin-left: auto;">📋 Copier</button>
+                    </h3>
+                    <div id="message-5" style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent-danger); font-family: 'DM Sans', sans-serif; line-height: 1.6;">
+                        <p><strong>Objet :</strong> Suite à votre candidature</p>
+                        <p style="margin-top: 0.75rem;">Bonjour [NOM],</p>
+                        <p>Merci pour l'intérêt porté à notre structure.</p>
+                        <p>Après étude de votre profil, nous ne pouvons malheureusement pas donner suite à votre candidature pour le moment. Nos besoins actuels ne correspondent pas exactement à votre domaine d'expertise.</p>
+                        <p>Nous conservons néanmoins votre dossier dans notre base et ne manquerons pas de vous recontacter si une opportunité se présente.</p>
+                        <p>Nous vous souhaitons beaucoup de succès dans vos projets.</p>
+                        <p style="margin-top: 0.75rem;">Cordialement,<br>[VOTRE NOM]</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Storage avec persistence
+        let formateurs = [];
+        let candidats = [];
+        let besoins = [];
+
+        // Chargement des données au démarrage (MODE DEMO)
+        async function loadData() {
+            console.log('MODE DEMO - Chargement des données exemples');
+            // Toujours charger les données d'exemple en mode démo
+            loadSampleData();
+        }
+
+        // Sauvegarde des données (DÉSACTIVÉ EN MODE DEMO)
+        async function saveData() {
+            console.log('Mode démo - données non sauvegardées');
+            // En mode démo, on ne sauvegarde pas les données
+            // Elles seront rechargées au prochain rafraîchissement
+        }
+
+        // Données d'exemple
+        function loadSampleData() {
+            formateurs = [
+                {
+                    id: 1,
+                    formateur: 'Marie Dubois',
+                    formations: ['Excel', 'PowerPoint', 'Word'],
+                    type: 'bureautique',
+                    tags: ['Expert', 'Certifiée'],
+                    tarif: '450€/jour',
+                    dossiers: 25,
+                    note: 4.8,
+                    contrat: 'cdi',
+                    calendly: 'ok',
+                    meet: 'https://meet.google.com/abc-defg-hij',
+                    linkedin: 'https://linkedin.com/in/mariedubois',
+                    observations: 'Excellente pédagogie, très appréciée des clients',
+                    notes: 'Formation certifiée Microsoft. Disponible immédiatement.'
+                },
+                {
+                    id: 2,
+                    formateur: 'Jean Martin',
+                    formations: ['Anglais', 'Espagnol'],
+                    type: 'langues',
+                    tags: ['Natif', 'Bilingue'],
+                    tarif: '60€/h',
+                    dossiers: 18,
+                    note: 4.5,
+                    contrat: 'sous-traitant',
+                    calendly: 'ok',
+                    meet: '',
+                    linkedin: 'https://linkedin.com/in/jeanmartin',
+                    observations: 'Spécialisé en anglais professionnel',
+                    notes: 'Diplômé Cambridge. Expérience 8 ans en entreprise.'
+                },
+                {
+                    id: 3,
+                    formateur: 'Sophie Laurent',
+                    formations: ['Photoshop', 'Illustrator', 'InDesign'],
+                    type: 'autre',
+                    tags: ['Expert'],
+                    tarif: '500€/jour',
+                    dossiers: 12,
+                    note: 4.9,
+                    contrat: 'cdd',
+                    calendly: 'ko',
+                    meet: 'https://meet.google.com/xyz-abcd-efg',
+                    linkedin: 'https://linkedin.com/in/sophielaurent',
+                    observations: 'Experte en design graphique',
+                    notes: 'Certifiée Adobe. Portfolio impressionnant.'
+                },
+                {
+                    id: 4,
+                    formateur: 'Thomas Petit',
+                    formations: ['Python', 'JavaScript', 'SQL'],
+                    type: 'autre',
+                    tags: ['Expert', 'Senior'],
+                    tarif: '600€/jour',
+                    dossiers: 30,
+                    note: 5.0,
+                    contrat: 'sous-traitant',
+                    calendly: 'ok',
+                    meet: 'https://meet.google.com/dev-code-123',
+                    linkedin: 'https://linkedin.com/in/thomaspetit',
+                    observations: 'Développeur senior, excellent formateur technique',
+                    notes: 'Spécialisé IA et Machine Learning. Très demandé.'
+                },
+                {
+                    id: 5,
+                    formateur: 'Emma Rousseau',
+                    formations: ['Allemand', 'Italien'],
+                    type: 'langues',
+                    tags: ['Natif'],
+                    tarif: '55€/h',
+                    dossiers: 14,
+                    note: 4.6,
+                    contrat: 'cdi',
+                    calendly: 'désactivé',
+                    meet: '',
+                    linkedin: '',
+                    observations: 'Native speaker allemand, très pédagogue',
+                    notes: 'Disponible pour formations intensives.'
+                },
+                {
+                    id: 6,
+                    formateur: 'Lucas Moreau',
+                    formations: ['Excel avancé', 'Power BI', 'Tableau'],
+                    type: 'bureautique',
+                    tags: ['Expert', 'Data'],
+                    tarif: '520€/jour',
+                    dossiers: 22,
+                    note: 4.7,
+                    contrat: 'sous-traitant',
+                    calendly: 'ok',
+                    meet: 'https://meet.google.com/data-viz-pro',
+                    linkedin: 'https://linkedin.com/in/lucasmoreau',
+                    observations: 'Expert en data visualization',
+                    notes: 'Certifié Microsoft Data Analyst. Formations sur-mesure.'
+                }
+            ];
+
+            candidats = [
+                {
+                    id: 1,
+                    nom: 'Pierre Durand',
+                    telephone: '06 12 34 56 78',
+                    formation: 'Python & IA',
+                    type: 'autre',
+                    source: 'LinkedIn',
+                    statut: 'rdv prévu',
+                    tarif: '550€/jour',
+                    nda: 'en cours',
+                    cv: 'CV_Pierre_Durand.pdf',
+                    linkedin: 'https://linkedin.com/in/pierredurand',
+                    observations: 'Profil très intéressant, 10 ans d\'expérience',
+                    notes: 'RDV jeudi 15h. A envoyé son book.'
+                },
+                {
+                    id: 2,
+                    nom: 'Alice Bernard',
+                    telephone: '06 23 45 67 89',
+                    formation: 'Allemand',
+                    type: 'langues',
+                    source: 'Indeed',
+                    statut: 'en échange',
+                    tarif: '55€/h',
+                    nda: 'non',
+                    cv: 'CV_Alice_Bernard.pdf',
+                    linkedin: 'https://linkedin.com/in/alicebernard',
+                    observations: 'Native speaker, intéressée',
+                    notes: 'A relancer cette semaine pour NDA.'
+                },
+                {
+                    id: 3,
+                    nom: 'Marc Lefebvre',
+                    telephone: '07 34 56 78 90',
+                    formation: 'Excel Expert',
+                    type: 'bureautique',
+                    source: 'Recommandation',
+                    statut: 'contacté',
+                    tarif: '480€/jour',
+                    nda: 'oui',
+                    cv: 'CV_Marc_Lefebvre.pdf',
+                    linkedin: '',
+                    observations: 'Recommandé par Marie D., excellent retour',
+                    notes: 'Certifié Microsoft MOS Expert. Très motivé.'
+                },
+                {
+                    id: 4,
+                    nom: 'Léa Martinez',
+                    telephone: '06 45 67 89 01',
+                    formation: 'Espagnol natif',
+                    type: 'langues',
+                    source: 'LinkedIn',
+                    statut: 'rdv prévu',
+                    tarif: '50€/h',
+                    nda: 'en cours',
+                    cv: null,
+                    linkedin: 'https://linkedin.com/in/leamartinez',
+                    observations: 'Bilingue FR-ES, expérience en entreprise',
+                    notes: 'RDV visio mardi matin.'
+                },
+                {
+                    id: 5,
+                    nom: 'David Chen',
+                    telephone: '07 56 78 90 12',
+                    formation: 'Photoshop & Design',
+                    type: 'autre',
+                    source: 'Indeed',
+                    statut: 'en échange',
+                    tarif: '450€/jour',
+                    nda: 'non',
+                    cv: 'CV_David_Chen.pdf',
+                    linkedin: 'https://linkedin.com/in/davidchen',
+                    observations: 'Portfolio impressionnant, background agence',
+                    notes: 'Demander ses références clients.'
+                }
+            ];
+
+            besoins = [
+                {
+                    id: 1,
+                    thematique: 'Intelligence Artificielle & ChatGPT',
+                    type: 'autre',
+                    priorite: 'élevée',
+                    observations: 'Besoin urgent pour formation ChatGPT et IA générative - Demande client confirmée'
+                },
+                {
+                    id: 2,
+                    thematique: 'Excel avancé (VBA & Macros)',
+                    type: 'bureautique',
+                    priorite: 'élevée',
+                    observations: 'Pour formations techniques en entreprise - 3 clients en attente'
+                },
+                {
+                    id: 3,
+                    thematique: 'Mandarin',
+                    type: 'langues',
+                    priorite: 'faible',
+                    observations: 'Demande ponctuelle - Client PME export Chine'
+                },
+                {
+                    id: 4,
+                    thematique: 'Power BI Dashboard',
+                    type: 'bureautique',
+                    priorite: 'moyenne',
+                    observations: 'Formation data viz pour équipes comptables'
+                },
+                {
+                    id: 5,
+                    thematique: 'Gestion de projet Agile/Scrum',
+                    type: 'autre',
+                    priorite: 'moyenne',
+                    observations: 'Demande récurrente des équipes IT'
+                },
+                {
+                    id: 6,
+                    thematique: 'Anglais Business (niveau C1)',
+                    type: 'langues',
+                    priorite: 'élevée',
+                    observations: 'Pour cadres dirigeants - Start prévue Q2'
+                }
+            ];
+
+            renderFormateurs();
+            renderCandidats();
+            renderBesoins();
+            updateKPI();
+        }
+
+        // Tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Render formateurs
+        function renderFormateurs() {
+            const tbody = document.getElementById('table-formateurs');
+            const search = document.getElementById('search-formateurs').value.toLowerCase();
+            const formationFilterEl = document.getElementById('filter-formation');
+            const formationFilter = formationFilterEl ? formationFilterEl.value : '';
+            const typeFilter = document.getElementById('filter-type-formation').value;
+            const contratFilter = document.getElementById('filter-contrat').value;
+
+            // Populate formation filter dropdown
+            if (formationFilterEl) {
+                const allFormations = new Set();
+                formateurs.forEach(f => {
+                    if (f.formations && Array.isArray(f.formations)) {
+                        f.formations.forEach(fm => {
+                            if (fm && fm.trim()) {
+                                allFormations.add(fm.trim());
+                            }
+                        });
+                    }
+                });
+                
+                const currentFormationFilter = formationFilterEl.value;
+                formationFilterEl.innerHTML = '<option value="">Toutes les formations</option>';
+                Array.from(allFormations).sort().forEach(formation => {
+                    const option = document.createElement('option');
+                    option.value = formation;
+                    option.textContent = formation;
+                    if (formation === currentFormationFilter) option.selected = true;
+                    formationFilterEl.appendChild(option);
+                });
+            }
+
+            let filtered = formateurs.filter(f => {
+                const matchSearch = (f.formateur && f.formateur.toLowerCase().includes(search)) ||
+                                  (f.formations && Array.isArray(f.formations) && f.formations.some(fm => fm && fm.toLowerCase().includes(search)));
+                const matchFormation = !formationFilter || (f.formations && Array.isArray(f.formations) && f.formations.includes(formationFilter));
+                const matchType = !typeFilter || f.type === typeFilter;
+                const matchContrat = !contratFilter || f.contrat === contratFilter;
+                return matchSearch && matchFormation && matchType && matchContrat;
+            });
+
+            tbody.innerHTML = filtered.map(f => `
+                <tr>
+                    <td><div class="editable" onclick="editCell(${f.id}, 'formateur', 'formateur', this)"><strong>${f.formateur || '(vide)'}</strong></div></td>
+                    <td>
+                        <div class="editable" onclick="editCell(${f.id}, 'formateur', 'formations', this)">
+                            <div class="tags">
+                                ${f.formations && f.formations.length > 0 ? f.formations.map(fm => `<span class="tag">${fm}</span>`).join('') : '(vide)'}
+                            </div>
+                        </div>
+                    </td>
+                    <td><div class="editable" onclick="editCell(${f.id}, 'formateur', 'type', this)"><span class="badge badge-info">${f.type || '(vide)'}</span></div></td>
+                    <td>
+                        <div class="editable" onclick="editCell(${f.id}, 'formateur', 'tags', this)">
+                            ${f.tags && f.tags.length > 0 ? f.tags.map(tag => 
+                                `<span class="badge badge-${tag === 'Natif' ? 'success' : tag === 'Expert' ? 'primary' : 'secondary'}" style="margin-right: 0.25rem;">${tag}</span>`
+                            ).join('') : '(vide)'}
+                        </div>
+                    </td>
+                    <td><div class="editable" onclick="editCell(${f.id}, 'formateur', 'tarif', this)">${f.tarif || '(vide)'}</div></td>
+                    <td><div class="editable" onclick="editCell(${f.id}, 'formateur', 'dossiers', this)"><strong>${f.dossiers || 0}</strong></div></td>
+                    <td>
+                        <div class="editable" onclick="editCell(${f.id}, 'formateur', 'note', this)">
+                            <span class="rating">${'★'.repeat(Math.floor(f.note || 0))}${'☆'.repeat(5 - Math.floor(f.note || 0))}</span>
+                            <span style="color: var(--text-secondary); margin-left: 0.5rem;">${(f.note || 0).toFixed(1)}</span>
+                        </div>
+                    </td>
+                    <td><div class="editable" onclick="editCell(${f.id}, 'formateur', 'contrat', this)"><span class="badge badge-secondary">${f.contrat || '(vide)'}</span></div></td>
+                    <td>
+                        <div class="editable" onclick="editCell(${f.id}, 'formateur', 'calendly', this)">
+                            <span class="badge badge-${
+                                f.calendly === 'ok' ? 'success' :
+                                f.calendly === 'ko' ? 'danger' : 'secondary'
+                            }">${f.calendly || 'désactivé'}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editable" onclick="editCell(${f.id}, 'formateur', 'meet', this)">
+                            ${f.meet ? `<a href="${f.meet}" target="_blank" class="link" onclick="event.stopPropagation()">🔗</a>` : '(vide)'}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="editable" onclick="editCell(${f.id}, 'formateur', 'observations', this)" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${f.observations || '(vide)'}
+                        </div>
+                    </td>
+                    <td>
+                        <button class="icon-btn" onclick="viewFormateur(${f.id})" title="Voir la fiche">📄</button>
+                        <button class="icon-btn" onclick="editFormateur(${f.id})" title="Modifier">✏️</button>
+                        <button class="icon-btn" onclick="deleteFormateur(${f.id})" title="Supprimer">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="12" class="empty-state">
+                            <div class="empty-state-icon">🔍</div>
+                            <div>Aucun formateur trouvé</div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Render candidats
+        function renderCandidats() {
+            const tbody = document.getElementById('table-candidats');
+            const search = document.getElementById('search-candidats').value.toLowerCase();
+            const formationFilterEl = document.getElementById('filter-candidat-formation');
+            const formationFilter = formationFilterEl.value;
+            const typeFilter = document.getElementById('filter-candidat-type').value;
+            const statutFilter = document.getElementById('filter-statut').value;
+            const ndaFilter = document.getElementById('filter-nda').value;
+
+            // Populate formation filter dropdown dynamically
+            const allFormations = new Set();
+            candidats.forEach(c => {
+                if (c.formation && c.formation.trim()) {
+                    allFormations.add(c.formation.trim());
+                }
+            });
+            
+            const currentFormationFilter = formationFilterEl.value;
+            formationFilterEl.innerHTML = '<option value="">Toutes les formations</option>';
+            Array.from(allFormations).sort().forEach(formation => {
+                const option = document.createElement('option');
+                option.value = formation;
+                option.textContent = formation;
+                if (formation === currentFormationFilter) {
+                    option.selected = true;
+                }
+                formationFilterEl.appendChild(option);
+            });
+
+            let filtered = candidats.filter(c => {
+                const matchSearch = c.nom.toLowerCase().includes(search) || 
+                                  (c.formation || '').toLowerCase().includes(search);
+                const matchFormation = !formationFilter || c.formation === formationFilter;
+                const matchType = !typeFilter || c.type === typeFilter;
+                const matchStatut = !statutFilter || c.statut === statutFilter;
+                const matchNda = !ndaFilter || c.nda === ndaFilter;
+                return matchSearch && matchFormation && matchType && matchStatut && matchNda;
+            });
+
+            tbody.innerHTML = filtered.map(c => `
+                <tr>
+                    <td><div class="editable" onclick="editCell(${c.id}, 'candidat', 'nom', this)"><strong>${c.nom || '(vide)'}</strong></div></td>
+                    <td><div class="editable" onclick="editCell(${c.id}, 'candidat', 'telephone', this)">${c.telephone || '(vide)'}</div></td>
+                    <td><div class="editable" onclick="editCell(${c.id}, 'candidat', 'formation', this)">${c.formation || '(vide)'}</div></td>
+                    <td><div class="editable" onclick="editCell(${c.id}, 'candidat', 'type', this)"><span class="badge badge-info">${c.type || '(vide)'}</span></div></td>
+                    <td><div class="editable" onclick="editCell(${c.id}, 'candidat', 'source', this)">${c.source || '(vide)'}</div></td>
+                    <td>
+                        <div class="editable" onclick="editCell(${c.id}, 'candidat', 'statut', this)">
+                            <span class="badge ${
+                                c.statut === 'rdv prévu' ? 'badge-success' :
+                                c.statut === 'en échange' ? 'badge-warning' : 'badge-secondary'
+                            }">${c.statut || '(vide)'}</span>
+                        </div>
+                    </td>
+                    <td><div class="editable" onclick="editCell(${c.id}, 'candidat', 'tarif', this)">${c.tarif || '(vide)'}</div></td>
+                    <td>
+                        <div class="editable" onclick="editCell(${c.id}, 'candidat', 'nda', this)">
+                            <span class="badge ${
+                                c.nda === 'oui' ? 'badge-success' :
+                                c.nda === 'en cours' ? 'badge-warning' : 'badge-danger'
+                            }">${c.nda || '(vide)'}</span>
+                        </div>
+                    </td>
+                    <td>${c.cv ? '📎 ' + c.cv : '(vide)'}</td>
+                    <td>
+                        <div class="editable" onclick="editCell(${c.id}, 'candidat', 'observations', this)" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${c.observations || '(vide)'}
+                        </div>
+                    </td>
+                    <td>
+                        <button class="icon-btn" onclick="viewCandidat(${c.id})" title="Voir la fiche">📄</button>
+                        <button class="icon-btn" onclick="editCandidat(${c.id})" title="Modifier">✏️</button>
+                        <button class="icon-btn" onclick="deleteCandidat(${c.id})" title="Supprimer">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="11" class="empty-state">
+                            <div class="empty-state-icon">🔍</div>
+                            <div>Aucun candidat trouvé</div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Render besoins
+        function renderBesoins() {
+            const tbody = document.getElementById('table-besoins');
+            
+            tbody.innerHTML = besoins.map(b => `
+                <tr>
+                    <td><div class="editable" onclick="editCell(${b.id}, 'besoin', 'thematique', this)"><strong>${b.thematique || '(vide)'}</strong></div></td>
+                    <td><div class="editable" onclick="editCell(${b.id}, 'besoin', 'type', this)"><span class="badge badge-info">${b.type || '(vide)'}</span></div></td>
+                    <td>
+                        <div class="editable" onclick="editCell(${b.id}, 'besoin', 'priorite', this)">
+                            <span class="badge priority-${b.priorite === 'élevée' ? 'high' : b.priorite === 'moyenne' ? 'medium' : 'low'}">
+                                ${b.priorite || '(vide)'}
+                            </span>
+                        </div>
+                    </td>
+                    <td><div class="editable" onclick="editCell(${b.id}, 'besoin', 'observations', this)" style="max-width: 300px;">${b.observations || '(vide)'}</div></td>
+                    <td>
+                        <button class="icon-btn" onclick="editBesoin(${b.id})" title="Modifier">✏️</button>
+                        <button class="icon-btn" onclick="deleteBesoin(${b.id})" title="Supprimer">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            if (besoins.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <div class="empty-state-icon">✅</div>
+                            <div>Aucun besoin de recrutement</div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Update KPI
+        function updateKPI() {
+            const totalFormateurs = formateurs.length;
+            const totalDossiers = formateurs.reduce((sum, f) => sum + f.dossiers, 0);
+            const moyDossiers = totalFormateurs > 0 ? (totalDossiers / totalFormateurs).toFixed(1) : 0;
+            const moyNote = totalFormateurs > 0 ? 
+                (formateurs.reduce((sum, f) => sum + f.note, 0) / totalFormateurs).toFixed(1) : 0;
+            
+            const topFormateur = formateurs.length > 0 ?
+                formateurs.reduce((max, f) => f.note > max.note ? f : max, formateurs[0]) : null;
+
+            // Calcul coût moyen
+            let totalCouts = 0;
+            let countCouts = 0;
+            formateurs.forEach(f => {
+                if (f.tarif) {
+                    const montant = parseFloat(f.tarif.replace(/[^0-9.]/g, ''));
+                    if (!isNaN(montant)) {
+                        totalCouts += montant;
+                        countCouts++;
+                    }
+                }
+            });
+            const coutMoyen = countCouts > 0 ? Math.round(totalCouts / countCouts) : 0;
+
+            document.getElementById('kpi-total-formateurs').textContent = totalFormateurs;
+            document.getElementById('kpi-total-dossiers').textContent = totalDossiers;
+            document.getElementById('kpi-moy-dossiers').textContent = moyDossiers;
+            document.getElementById('kpi-moy-note').textContent = moyNote;
+            document.getElementById('kpi-cout-moyen').textContent = coutMoyen + '€';
+            
+            if (topFormateur) {
+                document.getElementById('kpi-top-formateur').textContent = topFormateur.formateur;
+                document.getElementById('kpi-top-formateur-note').textContent = `Note: ${topFormateur.note.toFixed(1)}/5`;
+            }
+            
+            // Afficher les graphiques
+            renderGraphiques();
+        }
+
+        // Fonction pour afficher les graphiques
+        function renderGraphiques() {
+            if (formateurs.length === 0) return;
+            
+            // Répartition par type
+            const repartition = {
+                bureautique: formateurs.filter(f => f.type === 'bureautique').length,
+                langues: formateurs.filter(f => f.type === 'langues').length,
+                autre: formateurs.filter(f => f.type === 'autre').length
+            };
+            
+            const totalF = formateurs.length;
+            
+            document.getElementById('chart-repartition-type').innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="flex: 0 0 85px; font-weight: 600; font-size: 0.85rem;">📚 Bureau.</div>
+                        <div style="flex: 1; background: var(--bg-tertiary); border-radius: 6px; height: 24px; position: relative; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); height: 100%; width: ${totalF > 0 ? (repartition.bureautique / totalF * 100) : 0}%; transition: width 0.5s ease;"></div>
+                        </div>
+                        <div style="flex: 0 0 30px; text-align: right; font-weight: 700; font-size: 0.9rem; color: var(--accent-primary);">${repartition.bureautique}</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="flex: 0 0 85px; font-weight: 600; font-size: 0.85rem;">🌍 Langues</div>
+                        <div style="flex: 1; background: var(--bg-tertiary); border-radius: 6px; height: 24px; position: relative; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, var(--accent-success), var(--accent-primary)); height: 100%; width: ${totalF > 0 ? (repartition.langues / totalF * 100) : 0}%; transition: width 0.5s ease;"></div>
+                        </div>
+                        <div style="flex: 0 0 30px; text-align: right; font-weight: 700; font-size: 0.9rem; color: var(--accent-success);">${repartition.langues}</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="flex: 0 0 85px; font-weight: 600; font-size: 0.85rem;">⚡ Autre</div>
+                        <div style="flex: 1; background: var(--bg-tertiary); border-radius: 6px; height: 24px; position: relative; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, var(--accent-warning), var(--accent-danger)); height: 100%; width: ${totalF > 0 ? (repartition.autre / totalF * 100) : 0}%; transition: width 0.5s ease;"></div>
+                        </div>
+                        <div style="flex: 0 0 30px; text-align: right; font-weight: 700; font-size: 0.9rem; color: var(--accent-warning);">${repartition.autre}</div>
+                    </div>
+                </div>
+            `;
+            
+            // Coût moyen par type
+            const coutParType = { bureautique: [], langues: [], autre: [] };
+            formateurs.forEach(f => {
+                if (f.tarif && f.type && coutParType[f.type]) {
+                    const montant = parseFloat(f.tarif.replace(/[^0-9.]/g, ''));
+                    if (!isNaN(montant)) {
+                        coutParType[f.type].push(montant);
+                    }
+                }
+            });
+            
+            const couts = {
+                bureautique: coutParType.bureautique.length > 0 
+                    ? Math.round(coutParType.bureautique.reduce((a,b) => a+b, 0) / coutParType.bureautique.length) 
+                    : 0,
+                langues: coutParType.langues.length > 0 
+                    ? Math.round(coutParType.langues.reduce((a,b) => a+b, 0) / coutParType.langues.length) 
+                    : 0,
+                autre: coutParType.autre.length > 0 
+                    ? Math.round(coutParType.autre.reduce((a,b) => a+b, 0) / coutParType.autre.length) 
+                    : 0
+            };
+            
+            document.getElementById('chart-cout-type').innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: var(--bg-tertiary); border-radius: 6px;">
+                        <span style="font-weight: 600; font-size: 0.85rem;">📚 Bureautique</span>
+                        <span style="font-size: 1.1rem; font-weight: 700; color: var(--accent-primary); font-family: 'JetBrains Mono', monospace;">${couts.bureautique}€</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: var(--bg-tertiary); border-radius: 6px;">
+                        <span style="font-weight: 600; font-size: 0.85rem;">🌍 Langues</span>
+                        <span style="font-size: 1.1rem; font-weight: 700; color: var(--accent-success); font-family: 'JetBrains Mono', monospace;">${couts.langues}€</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: var(--bg-tertiary); border-radius: 6px;">
+                        <span style="font-weight: 600; font-size: 0.85rem;">⚡ Autre</span>
+                        <span style="font-size: 1.1rem; font-weight: 700; color: var(--accent-warning); font-family: 'JetBrains Mono', monospace;">${couts.autre}€</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // View formateur
+        function viewFormateur(id) {
+            const formateur = formateurs.find(f => f.id === id);
+            if (!formateur) return;
+
+            const body = document.getElementById('modal-formateur-body');
+            body.innerHTML = `
+                <div class="info-group">
+                    <div class="info-label">Formateur</div>
+                    <div class="info-value"><strong>${formateur.formateur}</strong></div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Formations</div>
+                    <div class="tags">
+                        ${formateur.formations.map(f => `<span class="tag">${f}</span>`).join('')}
+                    </div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Type</div>
+                    <div class="info-value"><span class="badge badge-info">${formateur.type}</span></div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Tarif</div>
+                    <div class="info-value">${formateur.tarif || '-'}</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Nombre de dossiers</div>
+                    <div class="info-value"><strong>${formateur.dossiers}</strong></div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Note qualité</div>
+                    <div class="info-value">
+                        <span class="rating">${'★'.repeat(Math.floor(formateur.note))}${'☆'.repeat(5 - Math.floor(formateur.note))}</span>
+                        <span style="margin-left: 0.5rem;">${formateur.note.toFixed(1)}/5</span>
+                    </div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Type de contrat</div>
+                    <div class="info-value"><span class="badge badge-secondary">${formateur.contrat}</span></div>
+                </div>
+                ${formateur.meet ? `
+                <div class="info-group">
+                    <div class="info-label">Lien Google Meet</div>
+                    <div class="info-value"><a href="${formateur.meet}" target="_blank" class="link">${formateur.meet}</a></div>
+                </div>
+                ` : ''}
+                ${formateur.linkedin ? `
+                <div class="info-group">
+                    <div class="info-label">LinkedIn</div>
+                    <div class="info-value"><a href="${formateur.linkedin}" target="_blank" class="link">${formateur.linkedin}</a></div>
+                </div>
+                ` : ''}
+                <div class="info-group">
+                    <div class="info-label">Observations</div>
+                    <div class="info-value">${formateur.observations || '-'}</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Notes détaillées</div>
+                    <textarea id="formateur-notes" rows="5">${formateur.notes || ''}</textarea>
+                    <button class="btn btn-primary" onclick="saveNotes(${id}, 'formateur')" style="margin-top: 0.5rem;">💾 Sauvegarder les notes</button>
+                </div>
+            `;
+
+            openModal('modal-formateur');
+        }
+
+        // View candidat
+        function viewCandidat(id) {
+            const candidat = candidats.find(c => c.id === id);
+            if (!candidat) return;
+
+            const body = document.getElementById('modal-candidat-body');
+            body.innerHTML = `
+                <div class="info-group">
+                    <div class="info-label">Candidat</div>
+                    <div class="info-value"><strong>${candidat.nom}</strong></div>
+                </div>
+                ${candidat.telephone ? `
+                <div class="info-group">
+                    <div class="info-label">Téléphone</div>
+                    <div class="info-value"><a href="tel:${candidat.telephone}" style="color: var(--accent-primary); text-decoration: none;">📞 ${candidat.telephone}</a></div>
+                </div>
+                ` : ''}
+                <div class="info-group">
+                    <div class="info-label">Formation proposée</div>
+                    <div class="info-value">${candidat.formation || '-'}</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Type</div>
+                    <div class="info-value"><span class="badge badge-info">${candidat.type || '-'}</span></div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Source</div>
+                    <div class="info-value">${candidat.source || '-'}</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Statut recrutement</div>
+                    <div class="info-value">
+                        <span class="badge ${
+                            candidat.statut === 'rdv prévu' ? 'badge-success' :
+                            candidat.statut === 'en échange' ? 'badge-warning' : 'badge-secondary'
+                        }">${candidat.statut || '-'}</span>
+                    </div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Tarif proposé</div>
+                    <div class="info-value">${candidat.tarif || '-'}</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">NDA</div>
+                    <div class="info-value">
+                        <span class="badge ${
+                            candidat.nda === 'oui' ? 'badge-success' :
+                            candidat.nda === 'en cours' ? 'badge-warning' : 'badge-danger'
+                        }">${candidat.nda || '-'}</span>
+                    </div>
+                </div>
+                ${candidat.cv ? `
+                <div class="info-group">
+                    <div class="info-label">CV</div>
+                    <div class="info-value">📎 ${candidat.cv}</div>
+                </div>
+                ` : ''}
+                ${candidat.linkedin ? `
+                <div class="info-group">
+                    <div class="info-label">LinkedIn</div>
+                    <div class="info-value"><a href="${candidat.linkedin}" target="_blank" class="link">${candidat.linkedin}</a></div>
+                </div>
+                ` : ''}
+                <div class="info-group">
+                    <div class="info-label">Observations</div>
+                    <div class="info-value">${candidat.observations || '-'}</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Notes détaillées</div>
+                    <textarea id="candidat-notes" rows="5">${candidat.notes || ''}</textarea>
+                    <button class="btn btn-primary" onclick="saveNotes(${id}, 'candidat')" style="margin-top: 0.5rem;">💾 Sauvegarder les notes</button>
+                </div>
+            `;
+
+            openModal('modal-candidat');
+        }
+
+        // Save notes
+        function saveNotes(id, type) {
+            if (type === 'formateur') {
+                const formateur = formateurs.find(f => f.id === id);
+                if (formateur) {
+                    formateur.notes = document.getElementById('formateur-notes').value;
+                    saveData();
+                    alert('Notes sauvegardées ✓');
+                }
+            } else if (type === 'candidat') {
+                const candidat = candidats.find(c => c.id === id);
+                if (candidat) {
+                    candidat.notes = document.getElementById('candidat-notes').value;
+                    saveData();
+                    alert('Notes sauvegardées ✓');
+                }
+            }
+        }
+
+        // Export formateurs
+        function exportFormateurs() {
+            const dataStr = JSON.stringify(formateurs, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `formateurs_export_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Import formateurs
+        function importFormateurs(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    let importedData = [];
+
+                    // Check if JSON or CSV
+                    if (file.name.endsWith('.json')) {
+                        importedData = JSON.parse(content);
+                    } else if (file.name.endsWith('.csv')) {
+                        // Parse CSV
+                        const lines = content.split('\n').filter(line => line.trim());
+                        const headers = lines[0].split(/[,;\t]/).map(h => h.trim().toLowerCase());
+                        
+                        for (let i = 1; i < lines.length; i++) {
+                            const values = lines[i].split(/[,;\t]/);
+                            const item = {};
+                            
+                            headers.forEach((header, index) => {
+                                const value = values[index] ? values[index].trim().replace(/^["']|["']$/g, '') : '';
+                                
+                                // Map common header names
+                                if (header.includes('nom') || header.includes('formateur')) {
+                                    item.formateur = value;
+                                } else if (header.includes('formation') && !header.includes('type')) {
+                                    item.formations = value.split(/[,;]/).map(f => f.trim()).filter(f => f);
+                                } else if (header.includes('type')) {
+                                    item.type = value;
+                                } else if (header.includes('tarif') || header.includes('prix')) {
+                                    item.tarif = value;
+                                } else if (header.includes('dossier')) {
+                                    item.dossiers = parseInt(value) || 0;
+                                } else if (header.includes('note') || header.includes('qualit')) {
+                                    item.note = parseFloat(value) || 0;
+                                } else if (header.includes('contrat')) {
+                                    item.contrat = value;
+                                } else if (header.includes('meet')) {
+                                    item.meet = value;
+                                } else if (header.includes('linkedin')) {
+                                    item.linkedin = value;
+                                } else if (header.includes('observation')) {
+                                    item.observations = value;
+                                }
+                            });
+                            
+                            if (item.formateur || item.formations) {
+                                importedData.push(item);
+                            }
+                        }
+                    }
+
+                    // Validate and add to formateurs
+                    let importCount = 0;
+                    const maxId = formateurs.length > 0 ? Math.max(...formateurs.map(f => f.id)) : 0;
+                    
+                    importedData.forEach((item, index) => {
+                        // Ensure required structure
+                        const newFormateur = {
+                            id: maxId + index + 1,
+                            formateur: item.formateur || item.nom || '',
+                            formations: Array.isArray(item.formations) ? item.formations : 
+                                       (item.formations ? item.formations.split(/[,;]/).map(f => f.trim()).filter(f => f) : []),
+                            type: item.type || '',
+                            tarif: item.tarif || '',
+                            dossiers: parseInt(item.dossiers) || 0,
+                            note: parseFloat(item.note) || 0,
+                            contrat: item.contrat || '',
+                            meet: item.meet || '',
+                            linkedin: item.linkedin || '',
+                            observations: item.observations || '',
+                            notes: item.notes || ''
+                        };
+                        
+                        formateurs.push(newFormateur);
+                        importCount++;
+                    });
+
+                    saveData();
+                    renderFormateurs();
+                    updateKPI();
+                    
+                    alert(`✅ ${importCount} formateur(s) importé(s) avec succès !`);
+                    
+                } catch (error) {
+                    console.error('Erreur import:', error);
+                    alert(`❌ Erreur lors de l'import: ${error.message}\n\nFormats acceptés:\n- JSON (export du dashboard)\n- CSV avec colonnes: formateur, formations, type, tarif, dossiers, note, contrat, meet, linkedin, observations`);
+                }
+            };
+
+            reader.readAsText(file);
+            event.target.value = ''; // Reset input
+        }
+
+        // Add quick row
+        function addQuickRow(type) {
+            const newItem = {
+                id: null // Will be set when saving
+            };
+
+            if (type === 'formateur') {
+                newItem.id = formateurs.length > 0 ? Math.max(...formateurs.map(f => f.id)) + 1 : 1;
+                newItem.formateur = '🆕 Nouveau formateur';
+                newItem.formations = [];
+                newItem.type = '';
+                newItem.tags = [];
+                newItem.tarif = '';
+                newItem.dossiers = 0;
+                newItem.note = 0;
+                newItem.contrat = '';
+                newItem.calendly = 'désactivé';
+                newItem.meet = '';
+                newItem.linkedin = '';
+                newItem.observations = '';
+                newItem.notes = '';
+                
+                formateurs.unshift(newItem); // Add at the beginning
+                saveData();
+                renderFormateurs();
+                updateKPI();
+                
+                // Highlight the new row
+                setTimeout(() => {
+                    const firstRow = document.querySelector('#table-formateurs tr:first-child');
+                    if (firstRow) {
+                        firstRow.classList.add('new-row');
+                        firstRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 100);
+                
+            } else if (type === 'candidat') {
+                newItem.id = candidats.length > 0 ? Math.max(...candidats.map(c => c.id)) + 1 : 1;
+                newItem.nom = '';
+                newItem.formation = '';
+                newItem.type = '';
+                newItem.source = '';
+                newItem.statut = '';
+                newItem.tarif = '';
+                newItem.nda = '';
+                newItem.cv = null;
+                newItem.linkedin = '';
+                newItem.observations = '';
+                newItem.notes = '';
+                
+                candidats.unshift(newItem);
+                saveData();
+                renderCandidats();
+                
+                setTimeout(() => {
+                    const firstRow = document.querySelector('#table-candidats tr:first-child');
+                    if (firstRow) {
+                        firstRow.classList.add('new-row');
+                        firstRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 100);
+                
+            } else if (type === 'besoin') {
+                newItem.id = besoins.length > 0 ? Math.max(...besoins.map(b => b.id)) + 1 : 1;
+                newItem.thematique = '';
+                newItem.type = '';
+                newItem.priorite = 'moyenne';
+                newItem.observations = '';
+                
+                besoins.unshift(newItem);
+                saveData();
+                renderBesoins();
+                
+                setTimeout(() => {
+                    const firstRow = document.querySelector('#table-besoins tr:first-child');
+                    if (firstRow) {
+                        firstRow.classList.add('new-row');
+                        firstRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 100);
+            }
+        }
+
+        // Add formateur
+        function addFormateur() {
+            document.getElementById('edit-formateur-title').textContent = '➕ Nouveau Formateur';
+            document.getElementById('form-formateur').reset();
+            document.getElementById('edit-formateur-id').value = '';
+            openModal('modal-edit-formateur');
+        }
+
+        // Edit formateur
+        function editFormateur(id) {
+            const formateur = formateurs.find(f => f.id === id);
+            if (!formateur) return;
+
+            document.getElementById('edit-formateur-title').textContent = '✏️ Modifier Formateur';
+            document.getElementById('edit-formateur-id').value = formateur.id;
+            document.getElementById('edit-formateur-nom').value = formateur.formateur;
+            document.getElementById('edit-formateur-formations').value = formateur.formations.join(', ');
+            document.getElementById('edit-formateur-type').value = formateur.type;
+            document.getElementById('edit-formateur-tarif').value = formateur.tarif;
+            document.getElementById('edit-formateur-dossiers').value = formateur.dossiers;
+            document.getElementById('edit-formateur-note').value = formateur.note;
+            document.getElementById('edit-formateur-contrat').value = formateur.contrat;
+            document.getElementById('edit-formateur-meet').value = formateur.meet || '';
+            document.getElementById('edit-formateur-linkedin').value = formateur.linkedin || '';
+            document.getElementById('edit-formateur-observations').value = formateur.observations || '';
+
+            openModal('modal-edit-formateur');
+        }
+
+        // Save formateur
+        function saveFormateur(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('edit-formateur-id').value;
+            const formateur = {
+                formateur: document.getElementById('edit-formateur-nom').value,
+                formations: document.getElementById('edit-formateur-formations').value
+                    .split(',').map(s => s.trim()).filter(s => s),
+                type: document.getElementById('edit-formateur-type').value,
+                tags: [],
+                tarif: document.getElementById('edit-formateur-tarif').value,
+                dossiers: parseInt(document.getElementById('edit-formateur-dossiers').value) || 0,
+                note: parseFloat(document.getElementById('edit-formateur-note').value) || 0,
+                contrat: document.getElementById('edit-formateur-contrat').value,
+                calendly: 'désactivé',
+                meet: document.getElementById('edit-formateur-meet').value,
+                linkedin: document.getElementById('edit-formateur-linkedin').value,
+                observations: document.getElementById('edit-formateur-observations').value,
+                notes: ''
+            };
+
+            if (id) {
+                // Update - préserver tags et calendly existants
+                const index = formateurs.findIndex(f => f.id === parseInt(id));
+                if (index !== -1) {
+                    formateur.tags = formateurs[index].tags || [];
+                    formateur.calendly = formateurs[index].calendly || 'désactivé';
+                    formateurs[index] = { ...formateurs[index], ...formateur };
+                }
+            } else {
+                // Add
+                formateur.id = formateurs.length > 0 ? Math.max(...formateurs.map(f => f.id)) + 1 : 1;
+                formateurs.push(formateur);
+            }
+
+            saveData();
+            renderFormateurs();
+            updateKPI();
+            closeModal('modal-edit-formateur');
+        }
+
+        // Delete formateur
+        function deleteFormateur(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce formateur ?')) {
+                formateurs = formateurs.filter(f => f.id !== id);
+                saveData();
+                renderFormateurs();
+                updateKPI();
+            }
+        }
+
+        // Add candidat
+        function addCandidat() {
+            document.getElementById('edit-candidat-title').textContent = '➕ Nouveau Candidat';
+            document.getElementById('form-candidat').reset();
+            document.getElementById('edit-candidat-id').value = '';
+            document.getElementById('cv-filename').textContent = '';
+            openModal('modal-edit-candidat');
+        }
+
+        // Edit candidat
+        function editCandidat(id) {
+            const candidat = candidats.find(c => c.id === id);
+            if (!candidat) return;
+
+            document.getElementById('edit-candidat-title').textContent = '✏️ Modifier Candidat';
+            document.getElementById('edit-candidat-id').value = candidat.id;
+            document.getElementById('edit-candidat-nom').value = candidat.nom;
+            document.getElementById('edit-candidat-telephone').value = candidat.telephone || '';
+            document.getElementById('edit-candidat-formation').value = candidat.formation || '';
+            document.getElementById('edit-candidat-type').value = candidat.type || '';
+            document.getElementById('edit-candidat-source').value = candidat.source || '';
+            document.getElementById('edit-candidat-statut').value = candidat.statut || '';
+            document.getElementById('edit-candidat-tarif').value = candidat.tarif || '';
+            document.getElementById('edit-candidat-nda').value = candidat.nda || '';
+            document.getElementById('edit-candidat-linkedin').value = candidat.linkedin || '';
+            document.getElementById('edit-candidat-observations').value = candidat.observations || '';
+            
+            // Afficher le nom du CV s'il existe
+            if (candidat.cv) {
+                document.getElementById('cv-filename').style.display = 'block';
+                document.getElementById('cv-filename-text').textContent = candidat.cv;
+            } else {
+                document.getElementById('cv-filename').style.display = 'none';
+                document.getElementById('cv-filename-text').textContent = '';
+            }
+
+            openModal('modal-edit-candidat');
+        }
+
+        // Save candidat
+        function saveCandidat(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('edit-candidat-id').value;
+            const cvFile = document.getElementById('edit-candidat-cv').files[0];
+            
+            const candidat = {
+                nom: document.getElementById('edit-candidat-nom').value,
+                telephone: document.getElementById('edit-candidat-telephone').value,
+                formation: document.getElementById('edit-candidat-formation').value,
+                type: document.getElementById('edit-candidat-type').value,
+                source: document.getElementById('edit-candidat-source').value,
+                statut: document.getElementById('edit-candidat-statut').value,
+                tarif: document.getElementById('edit-candidat-tarif').value,
+                nda: document.getElementById('edit-candidat-nda').value,
+                cv: cvFile ? cvFile.name : (id ? candidats.find(c => c.id === parseInt(id))?.cv : null),
+                linkedin: document.getElementById('edit-candidat-linkedin').value,
+                observations: document.getElementById('edit-candidat-observations').value,
+                notes: ''
+            };
+
+            if (id) {
+                // Update
+                const index = candidats.findIndex(c => c.id === parseInt(id));
+                if (index !== -1) {
+                    candidats[index] = { ...candidats[index], ...candidat };
+                }
+            } else {
+                // Add
+                candidat.id = candidats.length > 0 ? Math.max(...candidats.map(c => c.id)) + 1 : 1;
+                candidats.push(candidat);
+            }
+
+            saveData();
+            renderCandidats();
+            closeModal('modal-edit-candidat');
+        }
+
+        // Delete candidat
+        function deleteCandidat(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce candidat ?')) {
+                candidats = candidats.filter(c => c.id !== id);
+                saveData();
+                renderCandidats();
+            }
+        }
+
+        // Add besoin
+        function addBesoinRecrutement() {
+            document.getElementById('edit-besoin-title').textContent = '➕ Nouveau Besoin';
+            document.getElementById('form-besoin').reset();
+            document.getElementById('edit-besoin-id').value = '';
+            document.getElementById('edit-besoin-priorite').value = 'moyenne';
+            openModal('modal-edit-besoin');
+        }
+
+        // Edit besoin
+        function editBesoin(id) {
+            const besoin = besoins.find(b => b.id === id);
+            if (!besoin) return;
+
+            document.getElementById('edit-besoin-title').textContent = '✏️ Modifier Besoin';
+            document.getElementById('edit-besoin-id').value = besoin.id;
+            document.getElementById('edit-besoin-thematique').value = besoin.thematique;
+            document.getElementById('edit-besoin-type').value = besoin.type || '';
+            document.getElementById('edit-besoin-priorite').value = besoin.priorite;
+            document.getElementById('edit-besoin-observations').value = besoin.observations || '';
+
+            openModal('modal-edit-besoin');
+        }
+
+        // Save besoin
+        function saveBesoin(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('edit-besoin-id').value;
+            const besoin = {
+                thematique: document.getElementById('edit-besoin-thematique').value,
+                type: document.getElementById('edit-besoin-type').value,
+                priorite: document.getElementById('edit-besoin-priorite').value,
+                observations: document.getElementById('edit-besoin-observations').value
+            };
+
+            if (id) {
+                // Update
+                const index = besoins.findIndex(b => b.id === parseInt(id));
+                if (index !== -1) {
+                    besoins[index] = { ...besoins[index], ...besoin };
+                }
+            } else {
+                // Add
+                besoin.id = besoins.length > 0 ? Math.max(...besoins.map(b => b.id)) + 1 : 1;
+                besoins.push(besoin);
+            }
+
+            saveData();
+            renderBesoins();
+            closeModal('modal-edit-besoin');
+        }
+
+        // Delete besoin
+        function deleteBesoin(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce besoin ?')) {
+                besoins = besoins.filter(b => b.id !== id);
+                saveData();
+                renderBesoins();
+            }
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Close modals on background click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // Filters and search
+        document.getElementById('search-formateurs').addEventListener('input', renderFormateurs);
+        const filterFormation = document.getElementById('filter-formation');
+        if (filterFormation) {
+            filterFormation.addEventListener('change', renderFormateurs);
+        }
+        document.getElementById('filter-type-formation').addEventListener('change', renderFormateurs);
+        document.getElementById('filter-contrat').addEventListener('change', renderFormateurs);
+
+        document.getElementById('search-candidats').addEventListener('input', renderCandidats);
+        document.getElementById('filter-candidat-formation').addEventListener('change', renderCandidats);
+        document.getElementById('filter-candidat-type').addEventListener('change', renderCandidats);
+        document.getElementById('filter-statut').addEventListener('change', renderCandidats);
+        document.getElementById('filter-nda').addEventListener('change', renderCandidats);
+
+        // File upload display
+        document.getElementById('edit-candidat-cv').addEventListener('change', function(e) {
+            const filename = e.target.files[0]?.name || '';
+            if (filename) {
+                document.getElementById('cv-filename').style.display = 'block';
+                document.getElementById('cv-filename-text').textContent = filename;
+            }
+        });
+
+        // Clear CV function
+        function clearCV() {
+            document.getElementById('edit-candidat-cv').value = '';
+            document.getElementById('cv-filename').style.display = 'none';
+            document.getElementById('cv-filename-text').textContent = '';
+        }
+
+        // Sorting
+        let sortColumn = null;
+        let sortDirection = 'asc';
+
+        document.querySelectorAll('th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const column = th.dataset.sort;
+                
+                if (sortColumn === column) {
+                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortColumn = column;
+                    sortDirection = 'asc';
+                }
+
+                // Update UI
+                document.querySelectorAll('th.sortable').forEach(t => {
+                    t.classList.remove('sorted-asc', 'sorted-desc');
+                });
+                th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+
+                // Sort data
+                formateurs.sort((a, b) => {
+                    let valA = a[column];
+                    let valB = b[column];
+
+                    if (column === 'tarif') {
+                        // Extract numbers from tarif strings
+                        valA = parseFloat(valA.replace(/[^0-9.]/g, '')) || 0;
+                        valB = parseFloat(valB.replace(/[^0-9.]/g, '')) || 0;
+                    }
+
+                    if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+                    if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+
+                renderFormateurs();
+            });
+        });
+
+        // Inline editing
+        function editCell(id, type, field, element) {
+            const item = type === 'formateur' ? formateurs.find(f => f.id === id) :
+                        type === 'candidat' ? candidats.find(c => c.id === id) :
+                        besoins.find(b => b.id === id);
+            
+            if (!item) return;
+
+            const currentValue = item[field] || '';
+            const td = element.parentElement;
+            const originalContent = element.innerHTML;
+
+            // Prevent multiple edits
+            if (element.classList.contains('editing')) return;
+            element.classList.add('editing');
+
+            // Create appropriate input based on field
+            let input;
+            
+            if (field === 'tags') {
+                input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'edit-input';
+                input.value = Array.isArray(currentValue) ? currentValue.join(', ') : currentValue;
+                input.placeholder = 'Ex: Natif, Expert, Certifié';
+            } else if (field === 'calendly') {
+                input = document.createElement('select');
+                input.className = 'edit-select';
+                input.innerHTML = `
+                    <option value="ok" ${currentValue === 'ok' ? 'selected' : ''}>OK</option>
+                    <option value="ko" ${currentValue === 'ko' ? 'selected' : ''}>KO</option>
+                    <option value="désactivé" ${currentValue === 'désactivé' ? 'selected' : ''}>Désactivé</option>
+                `;
+            } else if (field === 'type') {
+                input = document.createElement('select');
+                input.className = 'edit-select';
+                input.innerHTML = `
+                    <option value="">-- Sélectionner --</option>
+                    <option value="bureautique" ${currentValue === 'bureautique' ? 'selected' : ''}>Bureautique</option>
+                    <option value="langues" ${currentValue === 'langues' ? 'selected' : ''}>Langues</option>
+                    <option value="autre" ${currentValue === 'autre' ? 'selected' : ''}>Autre</option>
+                `;
+            } else if (field === 'contrat') {
+                input = document.createElement('select');
+                input.className = 'edit-select';
+                input.innerHTML = `
+                    <option value="">-- Sélectionner --</option>
+                    <option value="sous-traitant" ${currentValue === 'sous-traitant' ? 'selected' : ''}>Sous-traitant</option>
+                    <option value="cdi" ${currentValue === 'cdi' ? 'selected' : ''}>CDI</option>
+                    <option value="cdd" ${currentValue === 'cdd' ? 'selected' : ''}>CDD d'usage</option>
+                `;
+            } else if (field === 'statut') {
+                input = document.createElement('select');
+                input.className = 'edit-select';
+                input.innerHTML = `
+                    <option value="">-- Sélectionner --</option>
+                    <option value="contacté" ${currentValue === 'contacté' ? 'selected' : ''}>Contacté</option>
+                    <option value="en échange" ${currentValue === 'en échange' ? 'selected' : ''}>En échange</option>
+                    <option value="rdv prévu" ${currentValue === 'rdv prévu' ? 'selected' : ''}>RDV prévu</option>
+                `;
+            } else if (field === 'nda') {
+                input = document.createElement('select');
+                input.className = 'edit-select';
+                input.innerHTML = `
+                    <option value="">-- Sélectionner --</option>
+                    <option value="oui" ${currentValue === 'oui' ? 'selected' : ''}>Oui</option>
+                    <option value="non" ${currentValue === 'non' ? 'selected' : ''}>Non</option>
+                    <option value="en cours" ${currentValue === 'en cours' ? 'selected' : ''}>En cours</option>
+                `;
+            } else if (field === 'priorite') {
+                input = document.createElement('select');
+                input.className = 'edit-select';
+                input.innerHTML = `
+                    <option value="élevée" ${currentValue === 'élevée' ? 'selected' : ''}>Élevée</option>
+                    <option value="moyenne" ${currentValue === 'moyenne' ? 'selected' : ''}>Moyenne</option>
+                    <option value="faible" ${currentValue === 'faible' ? 'selected' : ''}>Faible</option>
+                `;
+            } else if (field === 'observations') {
+                input = document.createElement('textarea');
+                input.className = 'edit-textarea';
+                input.value = currentValue;
+            } else if (field === 'formations') {
+                input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'edit-input';
+                input.value = Array.isArray(currentValue) ? currentValue.join(', ') : currentValue;
+                input.placeholder = 'Séparer par des virgules';
+            } else if (field === 'dossiers') {
+                input = document.createElement('input');
+                input.type = 'number';
+                input.className = 'edit-input';
+                input.value = currentValue || 0;
+                input.min = 0;
+            } else if (field === 'note') {
+                input = document.createElement('input');
+                input.type = 'number';
+                input.className = 'edit-input';
+                input.value = currentValue || 0;
+                input.min = 0;
+                input.max = 5;
+                input.step = 0.1;
+            } else {
+                input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'edit-input';
+                input.value = currentValue;
+            }
+
+            element.innerHTML = '';
+            element.appendChild(input);
+            input.focus();
+
+            // Save on blur or Enter
+            const saveEdit = () => {
+                let newValue = input.value;
+                
+                if (field === 'formations' || field === 'tags') {
+                    newValue = newValue.split(',').map(s => s.trim()).filter(s => s);
+                } else if (field === 'dossiers') {
+                    newValue = parseInt(newValue) || 0;
+                } else if (field === 'note') {
+                    newValue = parseFloat(newValue) || 0;
+                }
+
+                item[field] = newValue;
+                saveData();
+
+                element.classList.remove('editing');
+                
+                if (type === 'formateur') {
+                    renderFormateurs();
+                    updateKPI();
+                } else if (type === 'candidat') {
+                    renderCandidats();
+                } else {
+                    renderBesoins();
+                }
+            };
+
+            const cancelEdit = () => {
+                element.classList.remove('editing');
+                element.innerHTML = originalContent;
+            };
+
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && field !== 'observations') {
+                    e.preventDefault();
+                    saveEdit();
+                } else if (e.key === 'Escape') {
+                    cancelEdit();
+                }
+            });
+        }
+
+        // Fonction pour ouvrir le modal des messages de recrutement
+        function openMessagesRecrutement() {
+            openModal('modal-messages-recrutement');
+        }
+
+        // Fonction pour copier un message
+        function copyMessage(messageId) {
+            const messageEl = document.getElementById(messageId);
+            const text = messageEl.innerText;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // Feedback visuel
+                const btn = event.target.closest('button');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copié !';
+                btn.style.background = 'var(--accent-success)';
+                btn.style.color = 'white';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                }, 2000);
+            }).catch(err => {
+                alert('Erreur lors de la copie : ' + err);
+            });
+        }
+
+        // Initialize
+        loadData();
+    </script>
+</body>
+</html>

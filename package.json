@@ -1,0 +1,23 @@
+{
+  "name": "dashboard-formateurs",
+  "version": "2.0.0",
+  "description": "Dashboard de gestion des formateurs avec Supabase",
+  "main": "server-supabase.js",
+  "scripts": {
+    "dev": "node server-supabase.js",
+    "start": "node server-supabase.js",
+    "build": "echo 'No build step needed for static site'"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["dashboard", "formateurs", "supabase", "vercel"],
+  "author": "Votre Nom",
+  "license": "MIT"
+}
