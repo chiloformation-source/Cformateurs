@@ -404,6 +404,57 @@
             color: var(--accent-primary);
         }
 
+        /* Tag input component for formations */
+        .tag-input-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            padding: 0.45rem 0.6rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: text;
+            min-height: 44px;
+            align-items: center;
+        }
+        .tag-input-container:focus-within {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(0, 217, 255, 0.1);
+        }
+        .tag-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.2rem 0.5rem;
+            background: rgba(0, 217, 255, 0.15);
+            border: 1px solid rgba(0, 217, 255, 0.35);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--accent-primary);
+        }
+        .tag-chip-remove {
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--accent-primary);
+            font-size: 1rem;
+            line-height: 1;
+            padding: 0;
+            opacity: 0.65;
+        }
+        .tag-chip-remove:hover { opacity: 1; }
+        .tag-input-field {
+            flex: 1;
+            min-width: 100px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            padding: 0.1rem 0.2rem;
+        }
+
         /* Rating stars */
         .rating {
             color: var(--accent-warning);
@@ -1010,8 +1061,10 @@
                     </div>
 
                     <div class="info-group">
-                        <label class="info-label" for="edit-formateur-formations">Formations (séparées par des virgules)</label>
-                        <input type="text" id="edit-formateur-formations" placeholder="Excel, Word, PowerPoint" style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: 'DM Sans', sans-serif;">
+                        <label class="info-label">Formations <span style="font-weight:400; opacity:0.6; font-size:0.8rem;">(Entrée ou virgule pour ajouter)</span></label>
+                        <div id="formations-tag-input" class="tag-input-container" onclick="document.getElementById('formations-field-input').focus()">
+                            <input type="text" id="formations-field-input" class="tag-input-field" placeholder="Ex: Excel, Word, PowerPoint...">
+                        </div>
                     </div>
 
                     <div class="info-group">
@@ -2431,10 +2484,54 @@ Jean Martin,"Anglais,Espagnol",langues,60€/h,18,4.5,sous-traitant,,,Spécialis
         }
 
         // Add formateur
+        // ── Tag input for formations ───────────────────────────────────────
+        let _formationsTags = [];
+
+        function _escHtml(s) {
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        function formationsTagInputInit(formations) {
+            _formationsTags = Array.isArray(formations) ? [...formations] : [];
+            _renderFormationsTags();
+        }
+
+        function _renderFormationsTags() {
+            const container = document.getElementById('formations-tag-input');
+            if (!container) return;
+            const input = document.getElementById('formations-field-input');
+            container.querySelectorAll('.tag-chip').forEach(c => c.remove());
+            _formationsTags.forEach((f, i) => {
+                const chip = document.createElement('span');
+                chip.className = 'tag-chip';
+                chip.innerHTML = `${_escHtml(f)} <button type="button" class="tag-chip-remove" onclick="_removeFormationTag(${i})" title="Supprimer">×</button>`;
+                container.insertBefore(chip, input);
+            });
+        }
+
+        function _removeFormationTag(index) {
+            _formationsTags.splice(index, 1);
+            _renderFormationsTags();
+        }
+
+        function _addFormationTag(value) {
+            const v = value.trim();
+            if (v && !_formationsTags.includes(v)) {
+                _formationsTags.push(v);
+                _renderFormationsTags();
+            }
+        }
+
+        function getFormationsFromTagInput() {
+            return [..._formationsTags];
+        }
+        // ──────────────────────────────────────────────────────────────────
+
         function addFormateur() {
             document.getElementById('edit-formateur-title').textContent = '➕ Nouveau Formateur';
             document.getElementById('form-formateur').reset();
             document.getElementById('edit-formateur-id').value = '';
+            formationsTagInputInit([]);
             openModal('modal-edit-formateur');
         }
 
@@ -2446,7 +2543,7 @@ Jean Martin,"Anglais,Espagnol",langues,60€/h,18,4.5,sous-traitant,,,Spécialis
             document.getElementById('edit-formateur-title').textContent = '✏️ Modifier Formateur';
             document.getElementById('edit-formateur-id').value = formateur.id;
             document.getElementById('edit-formateur-nom').value = formateur.formateur;
-            document.getElementById('edit-formateur-formations').value = formateur.formations.join(', ');
+            formationsTagInputInit(formateur.formations || []);
             document.getElementById('edit-formateur-type').value = formateur.type;
             document.getElementById('edit-formateur-tarif').value = formateur.tarif;
             document.getElementById('edit-formateur-dossiers').value = formateur.dossiers;
@@ -2466,8 +2563,7 @@ Jean Martin,"Anglais,Espagnol",langues,60€/h,18,4.5,sous-traitant,,,Spécialis
             const id = document.getElementById('edit-formateur-id').value;
             const formateur = {
                 formateur: document.getElementById('edit-formateur-nom').value,
-                formations: document.getElementById('edit-formateur-formations').value
-                    .split(',').map(s => s.trim()).filter(s => s),
+                formations: getFormationsFromTagInput(),
                 type: document.getElementById('edit-formateur-type').value,
                 tags: [],
                 tarif: document.getElementById('edit-formateur-tarif').value,
@@ -2678,6 +2774,23 @@ Jean Martin,"Anglais,Espagnol",langues,60€/h,18,4.5,sous-traitant,,,Spécialis
             });
         });
 
+        // Tag input keyboard handling
+        document.getElementById('formations-field-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                _addFormationTag(this.value);
+                this.value = '';
+            } else if (e.key === 'Backspace' && this.value === '' && _formationsTags.length > 0) {
+                _removeFormationTag(_formationsTags.length - 1);
+            }
+        });
+        document.getElementById('formations-field-input').addEventListener('blur', function() {
+            if (this.value.trim()) {
+                _addFormationTag(this.value);
+                this.value = '';
+            }
+        });
+
         // Filters and search
         document.getElementById('search-formateurs').addEventListener('input', renderFormateurs);
         const filterFormation = document.getElementById('filter-formation');
@@ -2832,11 +2945,67 @@ Jean Martin,"Anglais,Espagnol",langues,60€/h,18,4.5,sous-traitant,,,Spécialis
                 input.className = 'edit-textarea';
                 input.value = currentValue;
             } else if (field === 'formations') {
-                input = document.createElement('input');
-                input.type = 'text';
-                input.className = 'edit-input';
-                input.value = Array.isArray(currentValue) ? currentValue.join(', ') : currentValue;
-                input.placeholder = 'Séparer par des virgules';
+                // Inline tag input editor
+                let inlineTags = Array.isArray(currentValue) ? [...currentValue] : [];
+
+                const tagContainer = document.createElement('div');
+                tagContainer.className = 'tag-input-container';
+                tagContainer.style.minWidth = '180px';
+
+                const addInput = document.createElement('input');
+                addInput.type = 'text';
+                addInput.className = 'tag-input-field';
+                addInput.placeholder = 'Ajouter...';
+
+                function renderInlineTags() {
+                    tagContainer.querySelectorAll('.tag-chip').forEach(c => c.remove());
+                    inlineTags.forEach((t, i) => {
+                        const chip = document.createElement('span');
+                        chip.className = 'tag-chip';
+                        chip.innerHTML = `${_escHtml(t)} <button type="button" class="tag-chip-remove">×</button>`;
+                        chip.querySelector('.tag-chip-remove').addEventListener('mousedown', (ev) => {
+                            ev.preventDefault();
+                            inlineTags.splice(i, 1);
+                            renderInlineTags();
+                        });
+                        tagContainer.insertBefore(chip, addInput);
+                    });
+                }
+
+                renderInlineTags();
+                tagContainer.appendChild(addInput);
+
+                addInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ',') {
+                        e.preventDefault(); e.stopPropagation();
+                        const v = addInput.value.trim();
+                        if (v && !inlineTags.includes(v)) { inlineTags.push(v); renderInlineTags(); }
+                        addInput.value = '';
+                    } else if (e.key === 'Backspace' && addInput.value === '' && inlineTags.length > 0) {
+                        inlineTags.splice(inlineTags.length - 1, 1);
+                        renderInlineTags();
+                    } else if (e.key === 'Escape') {
+                        element.classList.remove('editing');
+                        element.innerHTML = originalContent;
+                    }
+                });
+
+                tagContainer.addEventListener('focusout', (e) => {
+                    if (!tagContainer.contains(e.relatedTarget)) {
+                        const pending = addInput.value.trim();
+                        if (pending && !inlineTags.includes(pending)) inlineTags.push(pending);
+                        item[field] = [...inlineTags];
+                        saveData();
+                        element.classList.remove('editing');
+                        renderFormateurs();
+                        updateKPI();
+                    }
+                });
+
+                element.innerHTML = '';
+                element.appendChild(tagContainer);
+                addInput.focus();
+                return; // handled inline, skip default flow
             } else if (field === 'dossiers') {
                 input = document.createElement('input');
                 input.type = 'number';
@@ -2866,7 +3035,7 @@ Jean Martin,"Anglais,Espagnol",langues,60€/h,18,4.5,sous-traitant,,,Spécialis
             const saveEdit = () => {
                 let newValue = input.value;
                 
-                if (field === 'formations' || field === 'tags') {
+                if (field === 'tags') {
                     newValue = newValue.split(',').map(s => s.trim()).filter(s => s);
                 } else if (field === 'dossiers') {
                     newValue = parseInt(newValue) || 0;
